@@ -1,7 +1,7 @@
 # cuda_sort
 
 1)
-`nvcc merge_sort.cu -o merge_sort`
+`nvcc [...].cu -o [...].exe`
 
 2)
-`./merge_sort` 
+`./[...].exe` 

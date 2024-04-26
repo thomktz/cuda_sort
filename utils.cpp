@@ -25,7 +25,6 @@ void printArray(int *array, int size) {
 }
 
 void generateRandomSortedArray(int *array, int max_value, int size) {
-  srand(time(NULL));
 
   for (int i = 0; i < size; i++) {
     array[i] = rand() % (max_value + 1);
