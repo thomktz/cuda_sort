@@ -1,3 +1,4 @@
+#include <iostream>
 #include <stdio.h>
 #include "utils.cpp"
 
@@ -16,17 +17,16 @@ void testCUDA(cudaError_t error, const char* file, int line) {
 
 __global__ void empty_k(void) {}
 
-__global__ void merge_k(int *A, int sizeA, int *B, int sizeB, int *M, int length) {
-  /*A, B, M : arrays, length : max(|A|, |B|)*/
+__global__ void merge_k(int *A, int sizeA, int *B, int sizeB, int *M) {
 
   int i =  threadIdx.x;
   int Kx, Ky, Px, Py;
 
-  if (i>length) {
-    Kx=i-length;
-    Ky=length;
-    Px=length;
-    Py=i-length;
+  if (i>sizeA) {
+    Kx=i-sizeA;
+    Ky=sizeA;
+    Px=sizeA;
+    Py=i-sizeA;
   } else {
     Kx=0;
     Ky=i;
@@ -40,11 +40,11 @@ __global__ void merge_k(int *A, int sizeA, int *B, int sizeB, int *M, int length
     Qx=Kx+offset;
     Qy=Ky-offset;
 
-    printf("%d\n\n", Qx);
-
-    if (Qy >= 0 && Qx <= sizeB && (Qy == sizeA || Qx == 0 || A[Qy] > B[Qx - 1])) {
-      if (Qx == sizeB || Qy == 0 || A[Qy - 1] <= B[Qx]) {
-        if (Qy < sizeA && (Qx == sizeB || A[Qy] <= B[Qx])) {
+    if (
+      (Qy >= 0) && (Qx <= sizeB) && ((Qy == sizeA) || (Qx == 0) || (A[Qy] > B[Qx - 1]))
+    ) {
+      if ((Qx == sizeB) || (Qy == 0) || (A[Qy - 1] <= B[Qx])) {
+        if ((Qy < sizeA) && ((Qx == sizeB) || (A[Qy] <= B[Qx]))) {
           M[i]=A[Qy];
         } else {
           M[i]=B[Qx];
@@ -59,47 +59,51 @@ __global__ void merge_k(int *A, int sizeA, int *B, int sizeB, int *M, int length
       Py=Qy+1;
     }
   }
-
-	
-
 }
 
 int main(void) {
 
-  int *a, *b, *m;
-  int *d_a, *d_b, *d_m; // Vecteurs sur le GPU
+  int *A, *B, *M;
+  int *A_gpu, *B_gpu, *M_gpu;
   int max_value = 100;
   int sizeA = 5;
   int sizeB = 7;
   int sizeMax = max(sizeA, sizeB);
   int sizeM = sizeA + sizeB;
 
-  a = (int*)malloc(sizeA*sizeof(int));
-  b = (int*)malloc(sizeB*sizeof(int));
-	m = (int*)malloc(sizeM*sizeof(int));
+  A = (int*)malloc(sizeA * sizeof(int));
+  B = (int*)malloc(sizeB * sizeof(int));
+	M = (int*)malloc(sizeM * sizeof(int));
 
-  cudaMalloc(&d_a, sizeA*sizeof(int));
-  cudaMalloc(&d_b, sizeB*sizeof(int));
-  cudaMalloc(&d_m, sizeM*sizeof(int));
+  cudaMalloc(&A_gpu, sizeA * sizeof(int));
+  cudaMalloc(&B_gpu, sizeB * sizeof(int));
+  cudaMalloc(&M_gpu, sizeM * sizeof(int));
 
-  generateRandomSortedArray(a, max_value, sizeA);
-  generateRandomSortedArray(b, max_value, sizeB);
+  generateRandomSortedArray(A, max_value, sizeA);
+  generateRandomSortedArray(B, max_value, sizeB);
 
-  cudaMemcpy(d_a, a, sizeA, cudaMemcpyHostToDevice);
-  cudaMemcpy(d_b, b, sizeB, cudaMemcpyHostToDevice);
+  cudaMemcpy(A_gpu, A, sizeA * sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(B_gpu, B, sizeB * sizeof(int), cudaMemcpyHostToDevice);
 
-	merge_k <<<1, 1024>>> (d_a, sizeA, d_b, sizeB, d_m, sizeMax);
+	merge_k <<<1, sizeM>>> (A_gpu, sizeA, B_gpu, sizeB, M_gpu);
 
-  // Copie du résultat du GPU vers le CPU
-  cudaMemcpy(m, d_m, sizeM, cudaMemcpyDeviceToHost);
 
-  // Libération de la mémoire sur le GPU et le CPU
-  cudaFree(d_a);
-  cudaFree(d_b);
-  cudaFree(d_m);
-  free(a);
-  free(b);
-  free(m);
+  cudaMemcpy(M, M_gpu, sizeM * sizeof(int), cudaMemcpyDeviceToHost);
+
+  std::cout << "Array A: ";
+  printArray(A, sizeA);
+  std::cout << "Array B: ";
+  printArray(B, sizeB);
+
+  std::cout << "Merged array: ";
+  printArray(M, sizeM);
+
+  cudaFree(A_gpu);
+  cudaFree(B_gpu);
+  cudaFree(M_gpu);
+  free(A);
+  free(B);
+  free(M);
 
 	return 0;
 }
