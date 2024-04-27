@@ -1,6 +1,8 @@
 #include <cstdlib>
 
 void insertionSort(int arr[], int n) {
+  // Insertion sort algorithm, to sort the arrays to be merged
+
   int i, key, j;
   for (i = 1; i < n; i++) {
     key = arr[i];
@@ -15,8 +17,10 @@ void insertionSort(int arr[], int n) {
 }
 
 void printArray(int *array, int size) {
+  // Utils function to print an array
+
   printf("[");
-  // Assumes length is > 0
+  // (Assumes length is > 0)
   for (int i = 0; i < size-1; i++) {
     printf("%d, ", array[i]);
   }
@@ -25,10 +29,10 @@ void printArray(int *array, int size) {
 }
 
 void generateRandomSortedArray(int *array, int max_value, int size) {
+  // Utils function to generate a random sorted array
 
   for (int i = 0; i < size; i++) {
     array[i] = rand() % (max_value + 1);
   }
-
   insertionSort(array, size);
 }

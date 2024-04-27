@@ -2,6 +2,8 @@
 #include "utils.cpp"
 
 void mergePath(int A[], int B[], int M[], int sizeA, int sizeB) {
+  // Sequential merge algorithm
+
   int i = 0, j = 0, k = 0;
 
   while ((i + j) < (sizeA + sizeB)) {
@@ -19,6 +21,8 @@ void mergePath(int A[], int B[], int M[], int sizeA, int sizeB) {
 }
 
 int main() {
+  // Main script to merge two sorted arrays sequentially
+
   int max_value = 100;
   int sizeA = 5;
   int sizeB = 7;
