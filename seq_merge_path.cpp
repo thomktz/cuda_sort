@@ -20,7 +20,9 @@ void mergePath(int A[], int B[], int M[], int sizeA, int sizeB) {
   }
 }
 
-int main() {
+int time_sequential_merge_path() {
+  std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
+
   // Main script to merge two sorted arrays sequentially
 
   int max_value = 100;
@@ -31,18 +33,24 @@ int main() {
   int B[sizeB];
   int M[sizeA + sizeB];
 
-  generateRandomSortedArray(A, max_value, sizeA);
-  generateRandomSortedArray(B, max_value, sizeB);
+  fatsGenerateRandomSortedArray(A, max_value, sizeA);
+  fastGenerateRandomSortedArray(B, max_value, sizeB);
 
-  std::cout << "Array A: ";
-  printArray(A, sizeA);
-  std::cout << "Array B: ";
-  printArray(B, sizeB);
+  // std::cout << "Array A: ";
+  // printArray(A, sizeA);
+  // std::cout << "Array B: ";
+  // printArray(B, sizeB);
+
+  start = std::chrono::high_resolution_clock::now();
 
   mergePath(A, B, M, sizeA, sizeB);
 
-  std::cout << "Merged array: ";
-  printArray(M, sizeA + sizeB);
+  end = std::chrono::high_resolution_clock::now();
 
-  return 0;
+  // std::cout << "Merged array: ";
+  // printArray(M, sizeA + sizeB);
+
+  std::chrono::duration<double> temps = end - start;
+
+  return temps.count();
 }
