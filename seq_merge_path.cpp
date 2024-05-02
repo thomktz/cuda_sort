@@ -1,7 +1,7 @@
 #include <iostream>
 // #include "utils.cpp"
 
-void mergePath(int A[], int B[], int M[], int sizeA, int sizeB) {
+void mergePath(int A[], int sizeA, int B[], int sizeB, int M[]) {
   // Sequential merge algorithm
 
   int i = 0, j = 0;
@@ -18,39 +18,4 @@ void mergePath(int A[], int B[], int M[], int sizeA, int sizeB) {
       j++;
     }
   }
-}
-
-int time_sequential_merge_path(int size) {
-  std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
-
-  // Main script to merge two sorted arrays sequentially
-
-  int max_value = 100;
-  int sizeA = size;
-  int sizeB = size;
-
-  int A[sizeA];
-  int B[sizeB];
-  int M[sizeA + sizeB];
-
-  fastGenerateRandomSortedArray(A, max_value, sizeA);
-  fastGenerateRandomSortedArray(B, max_value, sizeB);
-
-  // std::cout << "Array A: ";
-  // printArray(A, sizeA);
-  // std::cout << "Array B: ";
-  // printArray(B, sizeB);
-
-  start = std::chrono::high_resolution_clock::now();
-
-  mergePath(A, B, M, sizeA, sizeB);
-
-  end = std::chrono::high_resolution_clock::now();
-
-  // std::cout << "Merged array: ";
-  // printArray(M, sizeA + sizeB);
-
-  std::chrono::duration<double> temps = end - start;
-  // std::cout << temps.count();
-  return temps.count();
 }

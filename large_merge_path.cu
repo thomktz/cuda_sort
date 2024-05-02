@@ -16,11 +16,14 @@ __global__ void naive_merge_big_k(int *A, int sizeA, int *B, int sizeB, int *M) 
     // Find value for M[i], for thread i.
 
     int i = threadIdx.x + blockIdx.x * blockDim.x;
-    if (i>=sizeA+sizeB) return;
+
+    // Prevent entering the loop if i is out of bounds
+    if (i >= (sizeA+sizeB)) return;
+
     int Kx, Ky, Py, offset, Qx, Qy;
 
     // No need to define Px, since it's never used
-    if (i>sizeA) {
+    if (i > sizeA) {
         Kx = i-sizeA;
         Ky = sizeA;
         Py = i-sizeA;
@@ -30,7 +33,7 @@ __global__ void naive_merge_big_k(int *A, int sizeA, int *B, int sizeB, int *M) 
         Py = 0;
     }
 
-    while (true){
+    while (true) {
         offset = abs(Ky-Py)/2;
         Qx = Kx+offset;
         Qy = Ky-offset;
@@ -66,10 +69,10 @@ __device__ void merge_big_k(int *A, int sizeA, int *B, int sizeB, int *M) {
     int Kx, Ky, Py, offset, Qx, Qy;
 
     // Prevent entering the loop if i is out of bounds
-    if (i >= (sizeA+sizeB)) { return; } 
+    if (i >= (sizeA+sizeB)) return;
 
     // No need to define Px, since it's never used
-    if (i>sizeA) {
+    if (i > sizeA) {
         Kx = i-sizeA;
         Ky = sizeA;
         Py = i-sizeA;
@@ -80,7 +83,7 @@ __device__ void merge_big_k(int *A, int sizeA, int *B, int sizeB, int *M) {
     }
 
     while (true){
-        offset = abs(Ky-Py)/2;
+        offset = abs(Ky - Py)/2;
         Qx = Kx+offset;
         Qy = Ky-offset;
 
@@ -108,7 +111,9 @@ __device__ void merge_big_k(int *A, int sizeA, int *B, int sizeB, int *M) {
     }
 }
 
-__global__ void parallel_partition(int* A, int sizeA, int* B, int sizeB, int* M){
+__global__ void parallel_partition(int* A, int sizeA, int* B, int sizeB, int* M) {
+    // Partition algorithm
+    
     int i = blockIdx.x;
     int A_start, A_top, A_bottom, B_start, B_top, M_start, a_i, b_i;
   
@@ -154,6 +159,7 @@ __global__ void parallel_partition(int* A, int sizeA, int* B, int sizeB, int* M)
     }
 
     __syncthreads();
+    // Launch a merge on the relevant sub-arrays
     merge_big_k(
         &A[A_start],  // Sub-array A for block i
         sizeA - A_start,  // Size of sub-array A

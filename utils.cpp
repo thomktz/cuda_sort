@@ -49,12 +49,12 @@ void generateRandomSortedArray(int *array, int max_value, int size) {
   insertionSort(array, size);
 }
 
-void fastGenerateRandomSortedArray(int *array, int max_value, int size) {
+void fastGenerateRandomSortedArray(int *array, int max_increment, int size) {
   // Utils function to generate a random sorted array
-  array[0] = rand() % (max_value + 1);
+  array[0] = rand() % (max_increment + 1);
 
   for (int i = 1; i < size; i++) {
-    array[i] = array[i-1] + rand() % (max_value + 1);
+    array[i] = array[i-1] + rand() % (max_increment + 1);
   }
 }
 
