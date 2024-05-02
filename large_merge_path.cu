@@ -12,6 +12,52 @@ void testCUDA(cudaError_t error, const char* file, int line) {
 
 #define testCUDA(error) (testCUDA(error, __FILE__ , __LINE__))
 
+_global__ void naive_merge_big_k(int *A, int sizeA, int *B, int sizeB, int *M) {
+    // Find value for M[i], for thread i.
+
+    int i = threadIdx.x;
+    int Kx, Ky, Py, offset, Qx, Qy;
+
+    // No need to define Px, since it's never used
+    if (i>sizeA) {
+        Kx = i-sizeA;
+        Ky = sizeA;
+        Py = i-sizeA;
+    } else {
+        Kx = 0;
+        Ky = i;
+        Py = 0;
+    }
+
+    while (true){
+        offset = abs(Ky-Py)/2;
+        Qx = Kx+offset;
+        Qy = Ky-offset;
+
+        if (
+            (Qy >= 0) && (Qx <= sizeB) && ((Qy == sizeA) || (Qx == 0) || (A[Qy] > B[Qx - 1]))
+        ) {
+            if (
+                (Qx == sizeB) || (Qy == 0) || (A[Qy - 1] <= B[Qx])
+            ) {
+                if (
+                    (Qy < sizeA) && ((Qx == sizeB) || (A[Qy] <= B[Qx]))
+                ) {
+                    M[i] = A[Qy];
+                } else {
+                    M[i] = B[Qx];
+                }
+                break;
+            } else {
+                Kx = Qx+1;
+                Ky = Qy-1;
+            }
+        } else {
+            Py = Qy+1;
+        }
+    }
+}
+
 __device__ void merge_big_k(int *A, int sizeA, int *B, int sizeB, int *M) {
     // Find value for M[i], for (block, thread) i.
 
