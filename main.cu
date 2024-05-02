@@ -4,6 +4,10 @@
 #include "utils.cpp"
 #include "seq_merge_path.cpp"
 
+double time_naive_large_merge(int size){
+  
+}
+
 double time_optimal_large_merge(int size) {
     std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
     
@@ -70,12 +74,15 @@ double time_optimal_large_merge(int size) {
 }
 
 int main(void){
+  std::cout << "hello";
   int max = 20;
   double *tps = new double[max];
 
   for (int i = 0; i<max; i++){
-    tps[i] = time_sequential_merge_path(pow(2,i));
+  //   // std::cout << i;
+    tps[i] = time_optimal_large_merge(pow(2,i));
   }
-  printArray(tps, max);
+  printArrayDouble(tps, max);
+  
   return 0;
 }
