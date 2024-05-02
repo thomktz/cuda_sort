@@ -4,18 +4,16 @@
 #include "utils.cpp"
 #include "large_merge_path.cu"
 #include "seq_merge_path.cpp"
+#include "timer.h"
 
 
-double time_merge_cuda(int* A, int* B, int size, void (*kernel)(int*, int, int*, int, int*)) {
-    cudaEvent_t start, stop;
-    float milliseconds = 0;
-
-    int *M;
+double time_merge_cuda(int size, void (*kernel)(int*, int, int*, int, int*)) {
+    float milliseconds;
+    int *A, *B, *M;
     int *A_gpu, *B_gpu, *M_gpu;
 
     int sizeA = size;
     int sizeB = size;
-    int sizeMax = std::max(sizeA, sizeB);
     int sizeM = sizeA + sizeB;
     int blockSize = 1024;
 
@@ -23,6 +21,14 @@ double time_merge_cuda(int* A, int* B, int size, void (*kernel)(int*, int, int*,
     int nThreads = std::min(sizeM, blockSize);
     int nBlocks = (sizeM + blockSize - 1) / blockSize;
 
+    A = (int*)malloc(sizeA * sizeof(int));
+    B = (int*)malloc(sizeB * sizeof(int));
+    M = (int*)malloc(sizeM * sizeof(int));
+
+    fastGenerateRandomSortedArray(A, 10, sizeA);
+    fastGenerateRandomSortedArray(B, 10, sizeB);
+
+    // TODO (void**)
     cudaMalloc(&A_gpu, sizeA * sizeof(int));
     cudaMalloc(&B_gpu, sizeB * sizeof(int));
     cudaMalloc(&M_gpu, sizeM * sizeof(int));
@@ -31,26 +37,25 @@ double time_merge_cuda(int* A, int* B, int size, void (*kernel)(int*, int, int*,
     cudaMemcpy(A_gpu, A, sizeA * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(B_gpu, B, sizeB * sizeof(int), cudaMemcpyHostToDevice);
 
-    // Create and start CUDA events
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
-    cudaEventRecord(start);
+    // Start timer
+    Timer timer = Timer();
+    timer.start();
 
     // Kernel execution
     kernel<<<nBlocks, nThreads>>>(A_gpu, sizeA, B_gpu, sizeB, M_gpu);
-    kernel<<<nBlocks, nThreads>>>(A_gpu, sizeA, B_gpu, sizeB, M_gpu);
+    cudaDeviceSynchronize();
 
-    // Stop event and calculate the elapsed time
-    cudaEventRecord(stop);
-    cudaEventSynchronize(stop);
-    cudaEventElapsedTime(&milliseconds, start, stop);
+    // Get elapsed time
+    timer.add();
+    milliseconds = timer.getsum();
 
     // Cleanup
     cudaFree(A_gpu);
     cudaFree(B_gpu);
     cudaFree(M_gpu);
-    cudaEventDestroy(start);
-    cudaEventDestroy(stop);
+    free(A);
+    free(B);
+    free(M);
 
     return milliseconds;
 }
@@ -126,7 +131,7 @@ int main(void){
         int num_iterations = std::min(max_iterations_per_size, max_iterations / size);
 
         for (int j = 0; j < num_iterations; j++) {
-            time_taken = time_optimal_large_merge(A, B, size);
+            time_taken = time_naive_large_merge(A, B, size);
             results_naive << size << "," << j << "," << time_taken << "\n";
         }
     }
@@ -140,7 +145,7 @@ int main(void){
         int num_iterations = std::min(max_iterations_per_size, max_iterations / size);
 
         for (int j = 0; j < num_iterations; j++) {
-            time_taken = time_optimal_large_merge(A, B, size);
+            time_taken = time_seq_merge(A, B, size);
             results_seq << size << "," << j << "," << time_taken << "\n";
         }
     }
