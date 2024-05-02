@@ -12,10 +12,11 @@ void testCUDA(cudaError_t error, const char* file, int line) {
 
 #define testCUDA(error) (testCUDA(error, __FILE__ , __LINE__))
 
-_global__ void naive_merge_big_k(int *A, int sizeA, int *B, int sizeB, int *M) {
+__global__ void naive_merge_big_k(int *A, int sizeA, int *B, int sizeB, int *M) {
     // Find value for M[i], for thread i.
 
-    int i = threadIdx.x;
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    if (i>=sizeA+sizeB) return;
     int Kx, Ky, Py, offset, Qx, Qy;
 
     // No need to define Px, since it's never used
