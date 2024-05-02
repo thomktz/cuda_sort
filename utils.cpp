@@ -16,7 +16,19 @@ void insertionSort(int arr[], int n) {
   }
 }
 
-void printArray(double *array, int size) {
+void printArray(int *array, int size) {
+  // Utils function to print an array
+
+  printf("[");
+  // (Assumes length is > 0)
+  for (int i = 0; i < size-1; i++) {
+    printf("%d, ", array[i]);
+  }
+  printf("%d]", array[size-1]);
+  printf("\n");
+}
+
+void printArrayDouble(double *array, int size) {
   // Utils function to print an array
 
   printf("[");
