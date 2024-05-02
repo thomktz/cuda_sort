@@ -126,7 +126,7 @@ int main(void){
         int num_iterations = std::min(max_iterations_per_size, max_iterations / size);
 
         for (int j = 0; j < num_iterations; j++) {
-            time_taken = time_optimal_large_merge(A, B, size);
+            time_taken = time_naive_large_merge(A, B, size);
             results_naive << size << "," << j << "," << time_taken << "\n";
         }
     }
@@ -140,7 +140,7 @@ int main(void){
         int num_iterations = std::min(max_iterations_per_size, max_iterations / size);
 
         for (int j = 0; j < num_iterations; j++) {
-            time_taken = time_optimal_large_merge(A, B, size);
+            time_taken = time_seq_merge(A, B, size);
             results_seq << size << "," << j << "," << time_taken << "\n";
         }
     }
