@@ -4,11 +4,11 @@
 #include "utils.cpp"
 #include "seq_merge_path.cpp"
 
-double time_naive_large_merge(int size){
+double time_naive_large_merge(int*A, int *B, int size){
       std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
     
     // Main script to merge two sorted arrays
-    int *A, *B, *M;
+    int *M;
     int *A_gpu, *B_gpu, *M_gpu;
     int max_value = 20;
     int sizeA = size;
@@ -21,16 +21,16 @@ double time_naive_large_merge(int size){
     int nThreads = std::min(sizeM, blockSize);
     int nBlocks =  (sizeM + blockSize - 1) / blockSize;
 
-    A = (int*)malloc(sizeA * sizeof(int));
-    B = (int*)malloc(sizeB * sizeof(int));
+    //A = (int*)malloc(sizeA * sizeof(int));
+    //B = (int*)malloc(sizeB * sizeof(int));
     M = (int*)malloc(sizeM * sizeof(int));
 
     cudaMalloc(&A_gpu, sizeA * sizeof(int));
     cudaMalloc(&B_gpu, sizeB * sizeof(int));
     cudaMalloc(&M_gpu, sizeM * sizeof(int));
 
-    fastGenerateRandomSortedArray(A, max_value, sizeA);
-    fastGenerateRandomSortedArray(B, max_value, sizeB);
+    //fastGenerateRandomSortedArray(A, max_value, sizeA);
+    //fastGenerateRandomSortedArray(B, max_value, sizeB);
 
     cudaMemcpy(A_gpu, A, sizeA * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(B_gpu, B, sizeB * sizeof(int), cudaMemcpyHostToDevice);
@@ -63,20 +63,21 @@ double time_naive_large_merge(int size){
     cudaFree(A_gpu);
     cudaFree(B_gpu);
     cudaFree(M_gpu);
-    free(A);
-    free(B);
+    //free(A);
+    //free(B);
     free(M);
 
-    return temps.count();
+    return 1000*temps.count();
 }
 
-double time_optimal_large_merge(int size) {
+double time_optimal_large_merge(int *A, int *B, int size) {
     std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
     
     // Main script to merge two sorted arrays
-    int *A, *B, *M;
+    // int *A, *B, *M;
+    int *M;
     int *A_gpu, *B_gpu, *M_gpu;
-    int max_value = 20;
+    // int max_value = 20;
     int sizeA = size;
     int sizeB = size; // Different sizes
     int sizeMax = max(sizeA, sizeB);
@@ -87,16 +88,16 @@ double time_optimal_large_merge(int size) {
     int nThreads = std::min(sizeM, blockSize);
     int nBlocks =  (sizeM + blockSize - 1) / blockSize;
 
-    A = (int*)malloc(sizeA * sizeof(int));
-    B = (int*)malloc(sizeB * sizeof(int));
+    // A = (int*)malloc(sizeA * sizeof(int));
+    // B = (int*)malloc(sizeB * sizeof(int));
     M = (int*)malloc(sizeM * sizeof(int));
 
     cudaMalloc(&A_gpu, sizeA * sizeof(int));
     cudaMalloc(&B_gpu, sizeB * sizeof(int));
     cudaMalloc(&M_gpu, sizeM * sizeof(int));
 
-    fastGenerateRandomSortedArray(A, max_value, sizeA);
-    fastGenerateRandomSortedArray(B, max_value, sizeB);
+    // fastGenerateRandomSortedArray(A, max_value, sizeA);
+    // fastGenerateRandomSortedArray(B, max_value, sizeB);
 
     cudaMemcpy(A_gpu, A, sizeA * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(B_gpu, B, sizeB * sizeof(int), cudaMemcpyHostToDevice);
@@ -129,8 +130,8 @@ double time_optimal_large_merge(int size) {
     cudaFree(A_gpu);
     cudaFree(B_gpu);
     cudaFree(M_gpu);
-    free(A);
-    free(B);
+    // free(A);
+    // free(B);
     free(M);
 
     return 1000*temps.count();
@@ -138,15 +139,32 @@ double time_optimal_large_merge(int size) {
 
 int main(void){
   // std::cout << "hello";
-
-  
-
-  int max = 25;
+  int max = 30;
   double *tps = new double[max];
+
+
+  int *A, *B;
+  int max_value = 20;
+  int sizeA = pow(2,max-1);
+  int sizeB = pow(2,max-1);
+  // int sizeM = sizeA + sizeB;
+  // int blockSize = 1024;
+  
+  // Pick adequate number of blocks and threads
+  // int nThreads = std::min(sizeM, blockSize);
+  // int nBlocks =  (sizeM + blockSize - 1) / blockSize;
+
+  A = (int*)malloc(sizeA * sizeof(int));
+  B = (int*)malloc(sizeB * sizeof(int));
+
+  fastGenerateRandomSortedArray(A, max_value, sizeA);
+  fastGenerateRandomSortedArray(B, max_value, sizeB);
+
+
 
   for (int i = 0; i<max; i++){
   //   // std::cout << i;
-    tps[i] = time_optimal_large_merge(pow(2,i));
+    tps[i] = time_optimal_large_merge(A,B, pow(2,i));
   }
   printArrayDouble(tps, max);
   
