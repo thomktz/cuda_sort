@@ -1,10 +1,10 @@
 #include <iostream>
-#include "utils.cpp"
+// #include "utils.cpp"
 
 void mergePath(int A[], int B[], int M[], int sizeA, int sizeB) {
   // Sequential merge algorithm
 
-  int i = 0, j = 0, k = 0;
+  int i = 0, j = 0;
 
   while ((i + j) < (sizeA + sizeB)) {
     if (i >= sizeA) {
@@ -20,20 +20,20 @@ void mergePath(int A[], int B[], int M[], int sizeA, int sizeB) {
   }
 }
 
-int time_sequential_merge_path() {
+int time_sequential_merge_path(int size) {
   std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
 
   // Main script to merge two sorted arrays sequentially
 
   int max_value = 100;
-  int sizeA = 5;
-  int sizeB = 7;
+  int sizeA = size;
+  int sizeB = size;
 
   int A[sizeA];
   int B[sizeB];
   int M[sizeA + sizeB];
 
-  fatsGenerateRandomSortedArray(A, max_value, sizeA);
+  fastGenerateRandomSortedArray(A, max_value, sizeA);
   fastGenerateRandomSortedArray(B, max_value, sizeB);
 
   // std::cout << "Array A: ";
@@ -51,6 +51,6 @@ int time_sequential_merge_path() {
   // printArray(M, sizeA + sizeB);
 
   std::chrono::duration<double> temps = end - start;
-
+  // std::cout << temps.count();
   return temps.count();
 }
